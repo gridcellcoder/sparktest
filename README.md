@@ -35,9 +35,9 @@ that will operate on the input file:
 
 The code required should implement a solution to each of these 3 methods in Java OR Scala OR Python OR ALL of them to achieve the requirements above.
 
-As it stands, the code does NOT fully compile, is NOT initialised with a correct spark context.
+As it stands, the code does NOT fully compile, is NOT initialised with a correct spark context. Please fix the code to make it compile (in the language that you choose)
 
-Whatever language you use, you *must* write unit tests in the src/test/ folder.
+Whatever language you use, you *must* write unit tests in the src/test/ folder that verifies the filter, average and average by group use cases.
    
 To get bonus points for Java and Scala applications, modify the `pom.xml` to produce an "uber jar". That is a Jar file with *all* dependancies include in the jar.
   
