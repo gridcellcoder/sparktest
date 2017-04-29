@@ -33,7 +33,7 @@ that will operate on the input file:
             
                       src/test/resources/test.csv
 
-The code required should implement a solution to each of these 3 methods in Java OR Scala OR Python OR ALL of them to achieve the requirements above.
+The code required should implement a solution to each of these 3 methods in *EITHER Java OR Scala OR Python OR ALL* of them to achieve the requirements above.
 
 As it stands, the code does NOT fully compile, is NOT initialised with a correct spark context. Please fix the code to make it compile (in the language that you choose)
 
