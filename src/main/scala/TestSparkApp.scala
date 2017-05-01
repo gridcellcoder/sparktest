@@ -20,20 +20,23 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  */
 
 class TestSparkApp {
-  private def filter(frame: Dataset[String]): Dataset = {
+  def filter(frame: Dataset[String]): Dataset = {
     //here filter out all rows that contain characters
   }
 
-  private def findAverage(frame: Dataset[String]): Dataset = {
+  def findAverage(frame: Dataset[String]): Dataset = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
   }
 
-  private def findAveragePerGroup(frame: Dataset[String]): Dataset = {
+  def findAveragePerGroup(frame: Dataset[String]): Dataset = {
     //use spark sql to find the average of column B Grouped by column A. The average should be added to the dataset as a new column
   }
 
-  private def startSession() = {
-    new SparkSession().builder.appName("Java Spark SQL basic example").getOrCreate
+  def startSession() = {
+    SparkSession.builder
+      .master("local")
+      .appName("Scala Spark SQL basic example")
+      .getOrCreate
   }
 }
 
