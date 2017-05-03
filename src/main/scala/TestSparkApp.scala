@@ -1,3 +1,4 @@
+import org.apache.spark
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 /*
@@ -19,20 +20,35 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * under the License.
  */
 
-object  TestSparkApp {
+class TestSparkApp(session: SparkSession) {
+
+  import session.implicits._
 
   def filter(frame: Dataset[String]): Dataset[String] = {
     //here filter out all rows that contain characters
+
+    val test = session.sparkContext.parallelize(List("test"))
+    session.createDataset[String](test)
   }
 
   def findAverage(frame: Dataset[String]): Dataset[String] = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
+
+    val test = session.sparkContext.parallelize(List("test"))
+    session.createDataset[String](test)
   }
 
   def findAveragePerGroup(frame: Dataset[String]): Dataset[String] = {
     //use spark sql to find the average of column B Grouped by column A. The average should be added to the dataset as a new column
+
+    val test = session.sparkContext.parallelize(List("test"))
+    session.createDataset[String](test)
   }
 
+
+}
+
+object TestSparkApp {
   def startSession(): SparkSession = {
     SparkSession.builder
       .master("local")

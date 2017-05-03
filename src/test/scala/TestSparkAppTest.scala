@@ -1,5 +1,5 @@
-import java.io.InputStream
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
+import org.apache.spark.sql.{Dataset, SparkSession}
 import TestSparkApp._
 
 
@@ -8,27 +8,34 @@ import TestSparkApp._
   */
 class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
 
-  override def beforeEach() {
+  // Test data
+  val url = getClass.getResource("/test.csv")
+  val path = url.toURI.getPath
+  val session = startSession
 
+  import session.implicits._
+
+  val testDS = session.sqlContext.read
+    .format("com.databricks.spark.csv")
+    .option("header", "true")
+    .load(path)
+    .as[InputData]
+
+
+  override def beforeEach() {
   }
 
   override def afterEach() {
-
   }
 
   override protected def beforeAll(): Unit = {
-
-    val session = startSession
-
-    val path = getClass.getResource("/test.csv").getPath
-    val testDS = session.sqlContext.read
-      .format("com.databricks.spark.csv")
-      .option("header", "false")
-      .load(path).as[String]
-
   }
 
   override protected def afterAll(): Unit = {}
+
+  test("Check test data") {
+    assert(testDS.count() === 3, "Data not loaded")
+  }
 
   test("testFilter") {
 
