@@ -1,6 +1,8 @@
 import org.apache.spark
 import org.apache.spark.sql.{Dataset, SparkSession}
 
+import scala.util.Try
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -27,15 +29,20 @@ class TestSparkApp(session: SparkSession) {
   def filter(frame: Dataset[String]): Dataset[String] = {
     //here filter out all rows that contain characters
 
-    val test = session.sparkContext.parallelize(List("test"))
-    session.createDataset[String](test)
+    // actually check that each row consists of numbers seperated by commas
+    // since other functions rely on this
+
+    frame.filter(s => { // filter dataset by checking each row....
+      s.split(",") // split each row by commas
+        .map(t => Try(t.toDouble).isSuccess) // check each sub-string can be converted to a number
+        .reduce(_ && _) // logical AND result from each sub-string
+    })
   }
 
   def findAverage(frame: Dataset[String]): Dataset[String] = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
 
-    val test = session.sparkContext.parallelize(List("test"))
-    session.createDataset[String](test)
+    frame
   }
 
   def findAveragePerGroup(frame: Dataset[String]): Dataset[String] = {
