@@ -1,5 +1,5 @@
 import org.apache.spark
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
 
 import scala.util.Try
 
@@ -26,23 +26,33 @@ class TestSparkApp(session: SparkSession) {
 
   import session.implicits._
 
-  def filter(frame: Dataset[String]): Dataset[String] = {
+  def loadFile(path: String): Dataset[String] = {
+    session.sqlContext.read
+      .format("com.databricks.spark.csv")
+      .option("header", "true")
+      .load(path)
+      .map(r => r.mkString(","))
+  }
+
+  def filter(frame: Dataset[String]): DataFrame = {
     //here filter out all rows that contain characters
 
     // actually check that each row consists of numbers seperated by commas
     // since other functions rely on this
 
-    frame.filter(s => { // filter dataset by checking each row....
-      s.split(",") // split each row by commas
-        .map(t => Try(t.toDouble).isSuccess) // check each sub-string can be converted to a number
-        .reduce(_ && _) // logical AND result from each sub-string
-    })
+    frame.flatMap(r => {
+      val fields = r.split(",")
+      val numbers = fields.flatMap( s => Try(s.toDouble).toOption)
+      numbers match {
+        case Array(x,y,z) => Some((x,y,z))
+        case _ => None}
+    }).toDF("a","b","c")
   }
 
-  def findAverage(frame: Dataset[String]): Dataset[String] = {
+  def findAverage(frame: Dataset[String]): DataFrame = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
-
-    frame
+    val df = filter(frame)
+    val average = df.avg()
   }
 
   def findAveragePerGroup(frame: Dataset[String]): Dataset[String] = {
@@ -51,8 +61,6 @@ class TestSparkApp(session: SparkSession) {
     val test = session.sparkContext.parallelize(List("test"))
     session.createDataset[String](test)
   }
-
-
 }
 
 object TestSparkApp {
