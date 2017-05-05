@@ -1,5 +1,7 @@
 import org.apache.spark
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.functions._
+
 
 import scala.util.Try
 
@@ -25,6 +27,7 @@ import scala.util.Try
 class TestSparkApp(session: SparkSession) {
 
   import session.implicits._
+
 
   def loadFile(path: String): Dataset[String] = {
     session.sqlContext.read
@@ -52,7 +55,8 @@ class TestSparkApp(session: SparkSession) {
   def findAverage(frame: Dataset[String]): DataFrame = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
     val df = filter(frame)
-    val average = df.avg()
+    val average = df.agg(avg($"a")).first.getDouble(0)
+    df.withColumn("avg(a)", lit(average) )
   }
 
   def findAveragePerGroup(frame: Dataset[String]): Dataset[String] = {
