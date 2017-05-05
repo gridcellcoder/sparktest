@@ -1,7 +1,5 @@
-import org.apache.spark
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
-
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 import scala.util.Try
 
@@ -24,11 +22,26 @@ import scala.util.Try
  * under the License.
  */
 
+/** Class to demonstrate basic Spark functions.
+  *
+  * This is implmented as class wrapping a SparkSession object. There is a companion object that provides a helper
+  * method that instantiates a local spark session.
+  *
+  * @param session Spark session to use for analysis
+  */
 class TestSparkApp(session: SparkSession) {
 
   import session.implicits._
 
-
+  /** Load a csv file into a Dataset.
+    *
+    * A dataframe is loaded from the provided file path. The file is loaded as a CSV file, and then converted to a
+    * dataset of Strings in CSV format. This provides some basic checking that the file is in a suitable format, and
+    * provides the data in a format that fits the required API.
+    *
+    * @param path the path to the file to load
+    * @return a Dataset of String, where strings are in CSV format
+    */
   def loadFile(path: String): Dataset[String] = {
     session.sqlContext.read
       .format("com.databricks.spark.csv")
@@ -37,41 +50,72 @@ class TestSparkApp(session: SparkSession) {
       .map(r => r.mkString(","))
   }
 
+  /** Filters a Dataset of strings into Dataframe with three integer columns
+    *
+    * The filter function attempts to parse each string in the input data set into three integers. Strings that cannot
+    * be successfully parsed are ignored. This ensures that the returned dataframe is suitable for subsequent analysis.
+    *
+    * The format of the numbers is not specified. Ints are used here because other functions group on these columns,
+    * and grouping on continuous values (e.g. Double) makes no sense.
+    *
+    * @param frame the Dataset to filter
+    * @return Dataframe with three columns [a; Int, b: Int, c: Int]
+    */
   def filter(frame: Dataset[String]): DataFrame = {
-    //here filter out all rows that contain characters
-
-    // actually check that each row consists of numbers seperated by commas
-    // since other functions rely on this
 
     frame.flatMap(r => {
-      val fields = r.split(",")
-      val numbers = fields.flatMap( s => Try(s.toDouble).toOption)
+      // Try to convert each line into Array of Ints
+      val numbers = r.split(",").flatMap(s => Try(s.toInt).toOption)
+      // Check arrays have three values
       numbers match {
-        case Array(x,y,z) => Some((x,y,z))
-        case _ => None}
-    }).toDF("a","b","c")
+        case Array(x, y, z) => Some((x, y, z))
+        case _ => None
+      }
+    }).toDF("a", "b", "c")
   }
 
+  /** Find the average of the column derived from the first value in the csv strings in the dataset
+    *
+    * This function uses the filter function to convert Strings "a, b, c" to [a: Int, b: Int, c: Int]
+    *
+    * @param frame the dataset to analyse. This should contain strings of three integers in CSV format.
+    * @return A dataframe containing the original data and a column containing the average of column 'a' appended
+    */
   def findAverage(frame: Dataset[String]): DataFrame = {
     //use spark sql to find the average of column A. The average should be added to the dataset as a new column
     val df = filter(frame)
     val average = df.agg(avg($"a")).first.getDouble(0)
-    df.withColumn("avg(a)", lit(average) )
+    df.withColumn("avg(a)", lit(average))
   }
 
-  def findAveragePerGroup(frame: Dataset[String]): Dataset[String] = {
+  /** Find average of column 'b' grouped by column 'a'.
+    *
+    * @param frame the dataset to analyse. This should contain strings of three integers in CSV format.
+    * @return A dataframe containing the original data and a column containing the average of column 'b' grouped by
+    *         column 'a' appended
+    */
+  def findAveragePerGroup(frame: Dataset[String]): DataFrame = {
     //use spark sql to find the average of column B Grouped by column A. The average should be added to the dataset as a new column
 
-    val test = session.sparkContext.parallelize(List("test"))
-    session.createDataset[String](test)
+    val df = filter(frame)
+    val grouped = df.groupBy($"a").agg(avg($"b"))
+
+    df.join(grouped, Seq("a"), "inner")
   }
 }
 
+/** Companion object for class.
+  *
+  */
 object TestSparkApp {
+  /** Gets or creates a local Psark Session
+    *
+    * @return a local Spark Session
+    */
   def startSession(): SparkSession = {
     SparkSession.builder
       .master("local")
-      .appName("Scala Spark SQL basic example")
+      .appName("GridCell Spark Test")
       .getOrCreate
   }
 }
