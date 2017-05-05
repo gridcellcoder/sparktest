@@ -108,7 +108,7 @@ class TestSparkApp(session: SparkSession) {
   *
   */
 object TestSparkApp {
-  /** Gets or creates a local Psark Session
+  /** Gets or creates a local Spark Session
     *
     * @return a local Spark Session
     */
