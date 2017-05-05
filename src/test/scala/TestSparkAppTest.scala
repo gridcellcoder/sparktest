@@ -29,8 +29,8 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
   /** Check file loading
     *
     */
-  test("load file") {
-    val result: Dataset[String] = testObject.loadFile(testFilePath)
+  test("load file success") {
+    val result: Dataset[String] = testObject.loadCsvFile(testFilePath).get
     val resultArray = result.collect()
 
     val expected = Array(
@@ -42,14 +42,20 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
       "2,3,3",
       "2,20,33")
 
-    assert(resultArray === expected, " Load file")
+    assert(resultArray === expected, " Load file success")
+  }
+
+  test("load file failure") {
+    val result = testObject.loadCsvFile("not_vaild_file")
+
+    assert(result.isFailure, "Load file fail")
   }
 
   /** Check filter function
     *
     */
   test("test filter 1") {
-    val data: Dataset[String] = testObject.loadFile(testFilePath)
+    val data: Dataset[String] = testObject.loadCsvFile(testFilePath).get
     val result = testObject.filter(data).collect()
 
     val expected = Array(
@@ -105,7 +111,7 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
     *
     */
   test("test findAverage") {
-    val data = testObject.loadFile(testFilePath)
+    val data = testObject.loadCsvFile(testFilePath).get
     val result = testObject.findAverage(data).collect()
 
     val expected = Array(
@@ -123,7 +129,7 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
     *
     */
   test("testFindAveragePerGroup") {
-    val data = testObject.loadFile(testFilePath)
+    val data = testObject.loadCsvFile(testFilePath).get
     val result = testObject.findAveragePerGroup(data).collect()
 
     val expected = Array(

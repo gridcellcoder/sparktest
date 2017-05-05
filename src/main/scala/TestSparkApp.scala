@@ -39,15 +39,17 @@ class TestSparkApp(session: SparkSession) {
     * dataset of Strings in CSV format. This provides some basic checking that the file is in a suitable format, and
     * provides the data in a format that fits the required API.
     *
+    * The result is returned as a Try[], so failure can be handled gracefully
+    *
     * @param path the path to the file to load
-    * @return a Dataset of String, where strings are in CSV format
+    * @return a Try[Dataset] of String, where strings are in CSV format
     */
-  def loadFile(path: String): Dataset[String] = {
-    session.sqlContext.read
+  def loadCsvFile(path: String): Try[Dataset[String]] = {
+    Try { session.sqlContext.read
       .format("com.databricks.spark.csv")
       .option("header", "true")
       .load(path)
-      .map(r => r.mkString(","))
+      .map(r => r.mkString(",")) }
   }
 
   /** Filters a Dataset of strings into Dataframe with three integer columns
