@@ -3,9 +3,11 @@ import org.apache.spark.sql.types.{StructField, StructType, IntegerType}
 import org.apache.spark.sql.{Dataset, Row}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, FunSuite}
 
-
 /**
   * Created by gfoote on 01/05/2017.
+  *
+  * Test suite for TestSparkApp class
+  *
   */
 class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAfterAll {
 
