@@ -18,7 +18,6 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
   import session.implicits._
 
 
-
   override def beforeEach(): Unit = {
     session.sparkContext.setLogLevel("WARN")
     testObject = new TestSparkApp(session)
@@ -48,7 +47,7 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
       "2,3,3",
       "2,20,33")
 
-    assert(resultArray === expected," Load file")
+    assert(resultArray === expected, " Load file")
   }
 
 
@@ -59,11 +58,11 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
     val result = testObject.filter(data).collect()
 
     val expected = Array(
-      Row(1,2,3),
-      Row(4,2,4),
-      Row(3,33,5),
-      Row(2,3,3),
-      Row(2,20,33)
+      Row(1, 2, 3),
+      Row(4, 2, 4),
+      Row(3, 33, 5),
+      Row(2, 3, 3),
+      Row(2, 20, 33)
     )
     assert(result === expected, "Filter test data")
   }
@@ -75,22 +74,33 @@ class TestSparkAppTest extends FunSuite with BeforeAndAfterEach with BeforeAndAf
     val result = testObject.findAverage(data).collect()
 
     val expected = Array(
-      Row(1,2,3,2.4),
-      Row(4,2,4,2.4),
-      Row(3,33,5, 2.4),
-      Row(2,3,3, 2.4),
-      Row(2,20,33, 2.4)
-      )
+      Row(1, 2, 3, 2.4),
+      Row(4, 2, 4, 2.4),
+      Row(3, 33, 5, 2.4),
+      Row(2, 3, 3, 2.4),
+      Row(2, 20, 33, 2.4)
+    )
 
-    assert(result === expected," findAverage")
+    assert(result === expected, " findAverage")
   }
 
-  test("testStartSession") {
-    fail("Not implemented")
-  }
 
   test("testFindAveragePerGroup") {
-    fail("Not implemented")
+
+    val data = testObject.loadFile(testFilePath)
+
+    val result = testObject.findAveragePerGroup(data).collect()
+
+    val expected = Array(
+      Row(1, 2, 3, 2.0),
+      Row(4, 2, 4, 2.0),
+      Row(3, 33, 5, 33.0),
+      Row(2, 3, 3, 11.5),
+      Row(2, 20, 33, 11.5)
+    )
+
+    assert(result === expected, "findAveragePerGroup")
+
   }
 
 }
